@@ -1,0 +1,30 @@
+#Codebook for tidy.txt data set
+## original data 
+Human Activity Recognition Using Smartphones Dataset
+the original data comes from http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones 
+and is processed through run_analysis.r code
+
+## data description
+
+iid = the individual identifer for each subject
+activity = activity done during the training or the test  who carried out the experiment
+
+
+a set of meansurmentents which name can be decomposed as follows :
+
+- tBodyAcc- Body acceleration obtained from triaxial acceleration from the accelerometer 
+- tGravityAcc - gravity optained from riaxial Angular velocity from the gyroscope
+- tBodyAccJerk - fast fourrier decomposition of tBodyAcc
+- tBodyGyro - fast fourrier decomposition of tGravityAcc
+
+for each we have retained only 
+- mean()  = mean signal 
+- standard deviation (std) = mean value of the standard devation of the signal
+
+for each we have signal direction
+- X
+- Y
+- Z
+
+So for example tBodyAcc-mean()-X
+is the Body acceleration obtained from triaxial acceleration from the accelerometer - mean - in direction X 
