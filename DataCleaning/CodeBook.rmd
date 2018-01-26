@@ -1,4 +1,4 @@
-#Codebook for tidy.txt data set
+# Codebook for tidy.txt data set
 ## original data 
 Human Activity Recognition Using Smartphones Dataset
 the original data comes from http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones 
@@ -19,7 +19,7 @@ a set of meansurmentents which name can be decomposed as follows :
 
 for each we have retained only 
 - mean()  = mean signal 
-- standard deviation (std) = mean value of the standard devation of the signal
+- std() = mean value of the standard devation of the signal
 
 for each we have signal direction
 - X
