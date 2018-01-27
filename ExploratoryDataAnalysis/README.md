@@ -4,14 +4,14 @@ author : Catherine Pfeifer
 
 ## content of this repo
 1. plot 1
-1.1 plot1.png : the plot in png
-1.2 Plot1.R : the code that lead to 
++ plot1.png : the plot in png
++  Plot1.R : the code that lead to the plot
 2. plot 2
-2.1 plot2.png : the plot in png
-2.2 Plot2.R : the code that lead to 
++  plot2.png : the plot in png
++  Plot2.R : the code that lead to the plot
 3. plot 3
-3.1 plot3.png : the plot in png
-3.2 Plot3.R : the code that lead to 
++  plot3.png : the plot in png
++  Plot3.R : the code that lead to the plot
 4. plot 4
-4.1 plot4.png : the plot in png
-4.2 Plot4.R : the code that lead to 
++  plot4.png : the plot in png
++  Plot4.R : the code that lead to the plot
