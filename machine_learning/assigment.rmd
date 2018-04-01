@@ -1,0 +1,154 @@
+---
+title: "Practical machine learning assignement"
+author: "Catherine Pfeifer"
+date: "1 April 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+```
+
+# Introduction 
+New mobile devices (such as awbone Up, Nike FuelBand, and Fitbit) allow to collect big amounts of data about people doing exercises, yet these data are not very informative about how they exercice, in our case how weight lifting is performed. More particularly we use the data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants who were asked to perform barbell lifts correctly and incorrectly in 5 different ways (referred ti as outcomes into A, B, C, D, and E categories). The objective of this report is to come up with a model that allows to predict wheather participants perform their exercices correctly. 
+
+# Data 
+The data available website http://groupware.les.inf.puc-rio.br/har (see the section on the Weight Lifting Exercise Dataset). There is a training dataset and a testing dataset. These are the variables in the training dataset and the testing dataset except class. 
+
+```{r getdata, echo=FALSE }
+trainUrl <- "http://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+testUrl <- "http://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+training <- read.csv(url(trainUrl), na.strings=c("NA","#DIV/0!",""))
+testing <- read.csv(url(testUrl), na.strings=c("NA","#DIV/0!",""))
+names(training)
+```
+the variables we are trying to predict is class
+```{r class, echo=FALSE}
+summary(training$classe)
+```
+These classes represent the correct and incorrect manners in which the exercise was performed. 
+
+
+# Methods 
+## set the R environment right
+The assignement is implemented in R and requires the following libraries. 
+```{r library}
+
+library(caret)
+library(rattle)
+library(randomForest)
+library(dplyr)
+```
+
+In order to make this report reproducible, we set the seed
+```{r seed}
+set.seed(12345)
+```
+
+## the modeling approach 
+Because we are predicting categorical data, random forest is appropriate. I will test 3 different versions of random forest, namely 
+1. simple random forest
+2. random forest with cross-validation 
+3. random forest with reduced variable through pca and cross-validation
+All models will be tested for inside and out of sample accuracy The model with the best outsample accuracy. will be retained. At the end the testing dataset will be used to predict the class for each of the 20 observtions. 
+
+
+Also the data we got is quite noisy and some variables contain lots of NAs, also the variables are likely  to be correlated, so in a first step data needs to be cleaned and if necessary reduced. 
+
+# Implementation
+## data clearning 
+First we need to remove the columns that are only NAs
+```{r}
+is_data  <- apply(!is.na(training), 2, sum) > nrow(training)-1 #gives the number of observation 
+training <- training[, is_data]
+```
+Also we need to remove the individual information that are just for reference (not explaining exercice behaviour) and make sure that the testing dataset consists of the same data
+```{r}
+training <- training[, - (1:6)]
+testing  <- select(testing ,names(training[1:length(training)-1]))
+```
+
+## data partitionning 
+We partition the training dataset into two parts for 60 and 40%. We will use the training 1 to fit the random forests and compute the out of sample on the training 2 
+```{r}
+inTrain <- createDataPartition(y=training$classe, p=0.60, list=FALSE)
+training1  <- training[inTrain,]
+training2  <- training[-inTrain,]
+```
+
+
+## Simple random forest 
+```{r}
+fitRF <- randomForest(classe~., data=training1, importance=TRUE, ntree=100)
+fitRF
+```
+
+We see that on the in sample accuracy is quite good as the error rate is below 1.4 %. 
+
+The out-of-sample accuracy (which is computed on testing dataset) is the following 
+```{r}
+predictions <- predict(fitRF, newdata=training2,type = "class")
+confusionMat <- confusionMatrix(predictions, training2$classe)
+confusionMat
+```
+The out of sample accuracy is 0.9878
+
+## random forest with cross-validation (here with 2 folds)
+
+```{r}
+
+fitRFcv <- train(classe~.,
+                  data=training1,
+                  method="rf",
+                  trControl=trainControl(method="cv",number=2),
+                  prox=TRUE,
+                  verbose=TRUE,
+                  allowParallel=TRUE)
+```
+
+
+```{r}
+predictions <- predict(fitRFcv, newdata=training2)
+confusionMat2 <- confusionMatrix(predictions, training2$classe)
+confusionMat2
+```
+
+## random forest with pre-processing (data reduction with pca)
+This code did not run because of a lack of RAM on my computer.
+
+```{r}
+# fitRFpca <- train(classe ~ .,
+#              data = training,
+#              method = "rf",
+#              preProcess = "pca",
+#              trControl = trainControl( preProcOptions=list(thresh=0.75)),
+#              prox = TRUE,
+#              verbose = TRUE,
+#              allowParallel = TRUE)
+```
+
+```{r}
+# predictions <- predict(fitRFpca, newdata=training2)
+# confusionMat3 <- confusionMatrix(predictions, training2$classe)
+# confusionMat3
+```
+
+# prediction in the testing data
+Now we use the best model to predict the testing data to report to coursera
+
+```{r}
+predictions <- predict(fitRFcv, newdata=testing)
+testing$classe <- predictions
+print(predictions)
+```
+
+# Conclusion
+
+All three random forest have yielded at very high accuracy. However, the more complext versions with cross-validation much slower and the pca did not work on my laptop. This raises the questions if the accuracy grain justifies the processing time. Indeed the simple random forest had a very high accurcay already. 
+
+
+
+
+
+
+
