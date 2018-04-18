@@ -1,0 +1,77 @@
+---
+title: "Exploring livestock ownership in East Africa"
+author: "Catherine Pfeifer"
+date: "17 April 2018"
+output:
+  slidy_presentation: default
+  ioslides_presentation: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+rm(list = ls())
+
+#setwd("C:/Users/Catherine Pfeifer/OneDrive/coursera/9-data product/MyFirstShinyApp")
+library(shiny)
+library(sp)
+library(rgdal)
+library(RColorBrewer)
+library(dplyr)
+library(ggplot2)
+library(mapproj)
+#library(maptools)
+data<-read.csv("./dataShiny.csv")
+
+EA.fort <- read.csv("./EAfort.csv")
+
+liv   <- "cattle"
+isrural<-1
+loc<-'rural'
+```
+
+## Introduction
+
+- DHS (Demographic Health Survey) is household data from USAID, that also contains livestock ownership information
+- This is an unprecedented opportunity to undestand who keeps livestock accross the developing world
+- the objective of the shiny app is to allow user to explore livestock ownership in East Africa (data for whole of Africa was too big for a free shiny app)
+- the user can 
+1. decide which species he/she is interested in 
+2. whether he/she want to look at rural, urban or both ownerhip
+
+The app returns a map showing the percentage of household owning the chosen type of livestock within a DHS cluster (grouped household, usually around 30 to insure that household cannot be traced back) 
+
+## The set up of the shiny app
+- the ui.r defines the interface
+- the server.r contains the mapping function (more detail in the next slide)
+- dataShiny.csv contains tidy DHS data 
+- EA.csv contains the boundary of East Africa (Kenya, Ethiopia, Uganda). It was pre-processed with fortify (a trick to map shapefiles with ggplot)
+
+## The mapping function 
+Beyond the commands to render the in shiny, the function build on two steps
+
+1. subset the DHS data based on the user selection with dplyr package
+```{r code,eval=FALSE, echo = TRUE}
+       # subset the data based on input
+       if(loc=="both"){
+          data2<-data%>% select(liv,x,y)%>%filter(x>0)
+          } else{
+          data2<-data %>% select(liv,x,y,IsRural) %>% dplyr::filter(IsRural==isrural) %>% filter(x>0)
+       } # end of if loop
+       data2<-na.omit(data2)
+```
+2. plot the data with ggplot (using the usual tricks necessary for geographical data)
+```{r plot, eval=FALSE,  echo=TRUE}     
+       ggplot()+
+            geom_point(data=data2,aes(x,y,colour= data2[1]))+
+            scale_colour_distiller(palette='Spectral')+
+            geom_path(data = EA.fort,aes(long,lat,group=group))+
+            coord_map()+
+            ggtitle("proportion of household keeping the selected type of animals")
+```
+
+## Conclusion
+1. It is a fun simple app that many stakeholders could easiely use
+2. geographical data tend to bigger and therefore more heavy to run
+3. do as much preprocessing outside of shiny to reduce to processing load
+
+Enjoy exploring East Africa! 
